@@ -16,10 +16,15 @@ class CampaignsAPIController extends Controller
 {
     use UploadTrait;
 
-    public function index()
+    public function index(Request $request)
     {
-        $campaigns = Campaigns::all();
-        return new CampaignsCollection(CampaignsResource::collection($campaigns),CampaignsResource::class);
+        if($request->get('is_light',false)){
+            $campaigns = new Campaigns();
+            $query = Campaigns::commonFunctionMethod(Campaigns::select($campaigns->light), $request, true);
+        } else {
+            $query = Campaigns::commonFunctionMethod(Campaigns::class, $request);
+        }
+        return new CampaignsCollection(CampaignsResource::collection($query),CampaignsResource::class);
     }
 
     public function show(Campaigns $campaigns)
@@ -83,10 +88,10 @@ class CampaignsAPIController extends Controller
 
     public function destory(Request $request, Campaigns $campaigns)
     {
-        Storage::deleteDirectory('/native/'.$campaigns->campaigns_id);
-        Storage::deleteDirectory('/display/'.$campaigns->campaigns_id);
-        Storage::deleteDirectory('/video/'.$campaigns->campaigns_id);
-        Storage::deleteDirectory('/audio/'.$campaigns->campaigns_id);
+        Storage::deleteDirectory('/native/'.$campaigns->id);
+        Storage::deleteDirectory('/display/'.$campaigns->id);
+        Storage::deleteDirectory('/video/'.$campaigns->id);
+        Storage::deleteDirectory('/audio/'.$campaigns->id);
         $campaigns->delete();
 
         return new DataTrueResource($campaigns);
